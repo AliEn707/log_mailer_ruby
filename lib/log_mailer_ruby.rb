@@ -3,7 +3,7 @@ require 'json'
 require 'mail'
 
 class LogMailer
-	SEQ=%w{load_config create_mail send_mail}
+	SEQ=%w{load_config check_files create_mail send_mail}
 	
 	attr_accessor :files
 	def self.run
@@ -16,7 +16,14 @@ class LogMailer
 		@files=get_files
 	end
 	
+	def check_files
+		@files.each{|f| File.open(f,"r"){|d| return (@has_data=true) if (d.read.size>0)}}
+#		p "files are clean"
+		return false
+	end
+	
 	def send_mail
+		return if !(@has_data)
 		@mail.delivery_method :smtp, { :address              => @config["smtp"]["address"],
 								   :port                 => @config["smtp"]["port"],
 								   :domain               => @config["smtp"]["domain"],
@@ -29,6 +36,7 @@ class LogMailer
 	end
 	
 	def create_mail
+		return if !(@has_data)
 		config=@config
 		runner=self
 		@mail=Mail.new do
