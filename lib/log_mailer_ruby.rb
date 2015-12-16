@@ -50,7 +50,7 @@ class LogMailer
 	
 	
 	def get_files
-		`ls #{@config["logs_path"]}`.split.map!{|f| "#{@config["logs_path"]}/#{f}"}
+		@config["logs_path"].split.map!{|path| `ls #{path}`}.join(" ").split.map!{|f| "#{@config["logs_path"]}/#{f}"}
 	end
 	
 	def create_body
